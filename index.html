@@ -3,30 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Input Data Warga - Pilkades Desa Padamara</title>
+  <title>Pilkades Desa Padamara</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center">
-  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-    <h1 class="text-xl font-bold text-gray-800 mb-1">📝 Input Data Warga</h1>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- 🔐 HALAMAN LOGIN -->
+  <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
+      <h1 class="text-xl font-bold text-center mb-4">🔐 Login Relawan</h1>
+      <form id="loginForm" class="space-y-4">
+        <input type="email" id="email" placeholder="Email" required 
+          class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="password" id="password" placeholder="Password" required 
+          class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+        <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Masuk
+        </button>
+      </form>
+      <p id="loginError" class="text-red-600 text-sm mt-2 hidden"></p>
+    </div>
+  </div>
+
+  <!-- 📝 HALAMAN FORM (Hanya muncul setelah login) -->
+  <div id="appPage" class="hidden p-4 max-w-md mx-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-xl font-bold">📝 Input Data Warga</h1>
+      <button id="btnLogout" class="text-sm text-red-600 hover:underline">Keluar</button>
+    </div>
+    
     <p class="text-sm text-gray-500 mb-4">NIK boleh dikosongkan. Data masuk antrian validasi admin.</p>
 
-    <form id="formWarga" class="space-y-4">
+    <form id="formWarga" class="space-y-4 bg-white p-4 rounded-lg shadow">
       <div>
         <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-        <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Ahmad Sudirman">
+        <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Ahmad Sudirman">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">NIK (Opsional)</label>
-        <input type="text" id="nik" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Boleh dikosongkan">
+        <input type="text" id="nik" class="mt-1 w-full p-2 border rounded" placeholder="Boleh dikosongkan">
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Wilayah</label>
-        <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-          <option value="">-- Memuat data wilayah... --</option>
+        <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white">
+          <option value="">-- Memuat wilayah... --</option>
         </select>
       </div>
 
@@ -50,10 +73,10 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
-        <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Sering kerja di luar kota"></textarea>
+        <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Sering kerja di luar kota"></textarea>
       </div>
 
-      <button type="submit" id="btnSimpan" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition disabled:opacity-50">
+      <button type="submit" id="btnSimpan" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">
         💾 Simpan Data
       </button>
     </form>
@@ -62,59 +85,88 @@
   </div>
 
   <script>
-    // 🔑 GANTI DENGAN DATA PROJECT SUPABASE ANDA
+    // 🔑 GANTI DENGAN DATA SUPABASE ANDA
     const SUPABASE_URL = 'https://givifuefydsncwkmubom.supabase.co'; 
     const SUPABASE_ANON_KEY = 'sb_publishable_xLEGtnkNTxxX3kr1QgqCKA_VEHv0VYc';
 
-    // ⚠️ PERBAIKAN: Gunakan 'sb' agar tidak bentrok dengan library CDN
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('🔗 Klien Supabase siap (variabel: sb)');
 
-    // Load dropdown wilayah
+    // Elemen DOM
+    const loginPage = document.getElementById('loginPage');
+    const appPage = document.getElementById('appPage');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // Cek sesi login saat halaman dimuat
+    async function checkSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        loginPage.classList.add('hidden');
+        appPage.classList.remove('hidden');
+        loadAlamat();
+      } else {
+        loginPage.classList.remove('hidden');
+        appPage.classList.add('hidden');
+      }
+    }
+    checkSession();
+
+    // Handle Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('btnLogin');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Masuk...';
+      loginError.classList.add('hidden');
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        loginError.textContent = '❌ ' + error.message;
+        loginError.classList.remove('hidden');
+      } else {
+        checkSession();
+      }
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+    });
+
+    // Handle Logout
+    btnLogout.addEventListener('click', async () => {
+      await sb.auth.signOut();
+      checkSession();
+    });
+
+    // Load Dropdown Wilayah
     async function loadAlamat() {
       const select = document.getElementById('alamatId');
       try {
-        console.log('📡 Mengambil data dari tabel alamat_ref...');
-        
-        // ⚠️ Gunakan 'sb' bukan 'supabase'
         const { data, error } = await sb
           .from('alamat_ref')
           .select('id, dusun, rw, rt')
           .order('rw', { ascending: true })
           .order('rt', { ascending: true });
 
-        if (error) {
-          console.error('❌ Error Query:', error);
-          alert('Gagal memuat wilayah: ' + error.message);
-          return;
-        }
+        if (error) throw error;
 
-        console.log('✅ Data berhasil:', data?.length || 0, 'baris');
-        
         select.innerHTML = '<option value="">-- Pilih Wilayah --</option>';
-        
-        if (!data || data.length === 0) {
-          select.innerHTML = '<option value="">⚠️ Data wilayah kosong di database</option>';
-          console.warn('⚠️ Pastikan SQL INSERT sudah dijalankan & RLS dimatikan');
-          return;
-        }
-
-        data.forEach(row => {
+        data?.forEach(row => {
           const opt = document.createElement('option');
           opt.value = row.id;
           opt.textContent = `RW ${row.rw} - RT ${row.rt} (${row.dusun})`;
           select.appendChild(opt);
         });
       } catch (err) {
-        console.error('💥 Error Sistem:', err);
-        select.innerHTML = '<option value="">❌ Error load wilayah</option>';
+        console.error('Gagal muat wilayah:', err);
+        select.innerHTML = '<option value="">❌ Gagal memuat</option>';
       }
     }
 
-    // Jalankan saat halaman siap
-    document.addEventListener('DOMContentLoaded', loadAlamat);
-
-    // Handle submit form
+    // Handle Submit Form
     document.getElementById('formWarga').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('btnSimpan');
@@ -139,7 +191,6 @@
         return;
       }
 
-      // ⚠️ Gunakan 'sb' untuk insert
       const { error } = await sb.from('warga').insert({
         nama, nik, alamat_id: parseInt(alamatId), status, catatan,
         sumber: 'web', status_validasi: 'pending', input_by: 'relawan_web'
