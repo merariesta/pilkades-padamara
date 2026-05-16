@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Data Warga - Pilkades Desa Padamara</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+    <h1 class="text-xl font-bold text-gray-800 mb-1">📝 Input Data Warga</h1>
+    <p class="text-sm text-gray-500 mb-4">NIK boleh dikosongkan. Data masuk antrian validasi admin.</p>
+
+    <form id="formWarga" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+        <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Ahmad Sudirman">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">NIK (Opsional)</label>
+        <input type="text" id="nik" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Boleh dikosongkan">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Wilayah</label>
+        <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+          <option value="">-- Memuat data wilayah... --</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Status Dukungan</label>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-green-50">
+            <input type="radio" name="status" value="siap" class="mr-2" required> Siap
+          </label>
+          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-yellow-50">
+            <input type="radio" name="status" value="ragu" class="mr-2"> Ragu
+          </label>
+          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-red-50">
+            <input type="radio" name="status" value="tolak" class="mr-2"> Tolak
+          </label>
+          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="status" value="belum" class="mr-2"> Belum
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
+        <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Sering kerja di luar kota"></textarea>
+      </div>
+
+      <button type="submit" id="btnSimpan" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition disabled:opacity-50">
+        💾 Simpan Data
+      </button>
+    </form>
+
+    <div id="pesan" class="mt-4 p-3 rounded text-sm hidden"></div>
+  </div>
+
+  <script>
+    // 🔑 GANTI DENGAN DATA PROJECT SUPABASE ANDA
+    const SUPABASE_URL = 'https://givifuefydsncwkmubom.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'sb_publishable_xLEGtnkNTxxX3kr1QgqCKA_VEHv0VYc';
+
+    // ⚠️ PERBAIKAN: Gunakan 'sb' agar tidak bentrok dengan library CDN
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('🔗 Klien Supabase siap (variabel: sb)');
+
+    // Load dropdown wilayah
+    async function loadAlamat() {
+      const select = document.getElementById('alamatId');
+      try {
+        console.log('📡 Mengambil data dari tabel alamat_ref...');
+        
+        // ⚠️ Gunakan 'sb' bukan 'supabase'
+        const { data, error } = await sb
+          .from('alamat_ref')
+          .select('id, dusun, rw, rt')
+          .order('rw', { ascending: true })
+          .order('rt', { ascending: true });
+
+        if (error) {
+          console.error('❌ Error Query:', error);
+          alert('Gagal memuat wilayah: ' + error.message);
+          return;
+        }
+
+        console.log('✅ Data berhasil:', data?.length || 0, 'baris');
+        
+        select.innerHTML = '<option value="">-- Pilih Wilayah --</option>';
+        
+        if (!data || data.length === 0) {
+          select.innerHTML = '<option value="">⚠️ Data wilayah kosong di database</option>';
+          console.warn('⚠️ Pastikan SQL INSERT sudah dijalankan & RLS dimatikan');
+          return;
+        }
+
+        data.forEach(row => {
+          const opt = document.createElement('option');
+          opt.value = row.id;
+          opt.textContent = `RW ${row.rw} - RT ${row.rt} (${row.dusun})`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.error('💥 Error Sistem:', err);
+        select.innerHTML = '<option value="">❌ Error load wilayah</option>';
+      }
+    }
+
+    // Jalankan saat halaman siap
+    document.addEventListener('DOMContentLoaded', loadAlamat);
+
+    // Handle submit form
+    document.getElementById('formWarga').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSimpan');
+      const pesan = document.getElementById('pesan');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+      pesan.classList.add('hidden');
+
+      const nama = document.getElementById('nama').value.trim();
+      const nik = document.getElementById('nik').value.trim() || null;
+      const alamatId = document.getElementById('alamatId').value;
+      const status = document.querySelector('input[name="status"]:checked')?.value;
+      const catatan = document.getElementById('catatan').value.trim();
+
+      if (!nama || !alamatId || !status) {
+        pesan.textContent = '❌ Mohon lengkapi Nama, Wilayah, dan Status.';
+        pesan.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700';
+        pesan.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = '💾 Simpan Data';
+        return;
+      }
+
+      // ⚠️ Gunakan 'sb' untuk insert
+      const { error } = await sb.from('warga').insert({
+        nama, nik, alamat_id: parseInt(alamatId), status, catatan,
+        sumber: 'web', status_validasi: 'pending', input_by: 'relawan_web'
+      });
+
+      pesan.classList.remove('hidden');
+      if (error) {
+        pesan.textContent = `❌ Gagal: ${error.message}`;
+        pesan.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700';
+      } else {
+        pesan.textContent = '✅ Data berhasil disimpan! Menunggu validasi admin.';
+        pesan.className = 'mt-4 p-3 rounded text-sm bg-green-100 text-green-700';
+        e.target.reset();
+        document.getElementById('alamatId').value = '';
+      }
+      btn.disabled = false;
+      btn.textContent = '💾 Simpan Data';
+    });
+  </script>
+</body>
+</html>
