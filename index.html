@@ -337,73 +337,97 @@
     };
 
     document.getElementById('checkAll').onchange = (e) => document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
-    document.getElementById('btnValidateSelected').onclick = async () => {
-      const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
-      if(!ids.length) return alert('Pilih data dulu');
-      for(const id of ids){ await sb.from('warga').update({ status_validasi: 'valid', validated_at: new Date().toISOString() }).eq('id', id); }
-      alert(`✅ ${ids.length} data divalidasi`); loadAdminDashboard();
-    };
-
-    document.getElementById('filterDusun').onchange = applyFilters;
-    document.getElementById('filterRW').onchange = applyFilters;
-    document.getElementById('btnResetFilter').onclick = () => { document.getElementById('filterDusun').value=''; document.getElementById('filterRW').value=''; applyFilters(); };
-    document.getElementById('btnRefresh').onclick = loadAdminDashboard;
-
-    document.getElementById('btnExport').onclick = () => {
-      const dVal = document.getElementById('filterDusun').value;
-      const rVal = document.getElementById('filterRW').value;
-      let data = allData;
-      if(dVal) data = data.filter(d => d.alamat_ref?.dusun === dVal);
-      if(rVal) data = data.filter(d => d.alamat_ref?.rw === rVal);
-      if(!data.length) return alert('Tidak ada data');
-      const csv = [['Nama','NIK','Dusun','RW','RT','Status','Validasi','Catatan','Waktu'].join(','), ...data.map(r => [r.nama, r.nik||'', r.alamat_ref.dusun, r.alamat_ref.rw, r.alamat_ref.rt, r.status, r.status_validasi, r.catatan||'', r.created_at].join(','))].join('\n');
-      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = `data_pilkades_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-    };
-
-    // AUTH
-    document.getElementById('loginForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('btnLogin'); btn.disabled=true; btn.textContent='⏳ Masuk...';
-      const { error } = await sb.auth.signInWithPassword({ email: document.getElementById('email').value.trim(), password: document.getElementById('password').value });
-      if(error){ document.getElementById('loginError').textContent='❌ '+error.message; document.getElementById('loginError').classList.remove('hidden'); }
-      else checkSession();
-      btn.disabled=false; btn.textContent='Masuk';
-    };
-    document.getElementById('btnLogout').onclick = () => sb.auth.signOut().then(checkSession);
-    document.getElementById('btnLogoutRelawan').onclick = () => sb.auth.signOut().then(checkSession);
-
-    async function loadAlamat() {
-      const select = document.getElementById('alamatId');
-      const { data } = await sb.from('alamat_ref').select('id, dusun, rw, rt').order('rw').order('rt');
-      select.innerHTML = '<option value="">-- Pilih Wilayah --</option>' + (data||[]).map(r => `<option value="${r.id}">RW ${r.rw} - RT ${r.rt} (${r.dusun})</option>`).join('');
+    // ✅ ADMIN: Event listeners dengan null check
+const btnValidateSelected = document.getElementById('btnValidateSelected');
+if (btnValidateSelected) {
+  btnValidateSelected.onclick = async () => {
+    const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+    if (!ids.length) return alert('Pilih data dulu');
+    for (const id of ids) {
+      await sb.from('warga').update({ status_validasi: 'valid', validated_at: new Date().toISOString() }).eq('id', id);
     }
+    alert(`✅ ${ids.length} data divalidasi`); loadAdminDashboard();
+  };
+}
 
-    document.getElementById('formWarga').onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('btnSimpan'); const msg = document.getElementById('pesan');
-      btn.disabled=true; btn.textContent='⏳ Menyimpan...'; msg.classList.add('hidden');
-      
-      // ✅ FIX: Simpan email relawan sebagai input_by
-      const { error } = await sb.from('warga').insert({
-        nama: document.getElementById('nama').value.trim(),
-        nik: document.getElementById('nik').value.trim() || null,
-        alamat_id: parseInt(document.getElementById('alamatId').value),
-        status: document.querySelector('input[name="status"]:checked')?.value,
-        catatan: document.getElementById('catatan').value.trim(),
-        sumber: 'web', status_validasi: 'pending', 
-        input_by: currentSession.user.email.toLowerCase()
-      });
+const btnResetFilter = document.getElementById('btnResetFilter');
+if (btnResetFilter) btnResetFilter.onclick = () => { document.getElementById('filterDusun').value=''; document.getElementById('filterRW').value=''; applyFilters(); };
 
-      msg.classList.remove('hidden');
-      if(error){ msg.textContent='❌ '+error.message; msg.className='mt-4 p-3 rounded text-sm bg-red-100 text-red-700'; }
-      else{ msg.textContent='✅ Tersimpan! Menunggu validasi.'; msg.className='mt-4 p-3 rounded text-sm bg-green-100 text-green-700'; e.target.reset(); loadPersonalData(); }
-      btn.disabled=false; btn.textContent='💾 Simpan Data';
-    };
+const btnRefresh = document.getElementById('btnRefresh');
+if (btnRefresh) btnRefresh.onclick = loadAdminDashboard;
 
+const btnExport = document.getElementById('btnExport');
+if (btnExport) {
+  btnExport.onclick = () => {
+    const dVal = document.getElementById('filterDusun').value;
+    const rVal = document.getElementById('filterRW').value;
+    let data = allData;
+    if (dVal) data = data.filter(d => d.alamat_ref?.dusun === dVal);
+    if (rVal) data = data.filter(d => d.alamat_ref?.rw === rVal);
+    if (!data.length) return alert('Tidak ada data');
+    const csv = [['Nama','NIK','Dusun','RW','RT','Status','Validasi','Catatan','Waktu'].join(','), ...data.map(r => [r.nama, r.nik||'', r.alamat_ref.dusun, r.alamat_ref.rw, r.alamat_ref.rt, r.status, r.status_validasi, r.catatan||'', r.created_at].join(','))].join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = `data_pilkades_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  };
+}
+
+// ✅ FILTERS
+const filterDusun = document.getElementById('filterDusun');
+if (filterDusun) filterDusun.onchange = applyFilters;
+
+const filterRW = document.getElementById('filterRW');
+if (filterRW) filterRW.onchange = applyFilters;
+
+// ✅ RELAWAN: Toggle View Buttons
+const btnViewPersonal = document.getElementById('btnViewPersonal');
+if (btnViewPersonal) btnViewPersonal.onclick = () => toggleRelawanView('personal');
+
+const btnViewRecap = document.getElementById('btnViewRecap');
+if (btnViewRecap) btnViewRecap.onclick = () => toggleRelawanView('recap');
+
+// ✅ AUTH & FORM
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnLogin'); btn.disabled=true; btn.textContent='⏳ Masuk...';
+    const { error } = await sb.auth.signInWithPassword({ email: document.getElementById('email').value.trim(), password: document.getElementById('password').value });
+    if(error){ document.getElementById('loginError').textContent='❌ '+error.message; document.getElementById('loginError').classList.remove('hidden'); }
+    else checkSession();
+    btn.disabled=false; btn.textContent='Masuk';
+  };
+}
+
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) btnLogout.onclick = () => sb.auth.signOut().then(checkSession);
+
+const btnLogoutRelawan = document.getElementById('btnLogoutRelawan');
+if (btnLogoutRelawan) btnLogoutRelawan.onclick = () => sb.auth.signOut().then(checkSession);
+
+// ✅ FORM INPUT WARGA
+const formWarga = document.getElementById('formWarga');
+if (formWarga) {
+  formWarga.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSimpan'); const msg = document.getElementById('pesan');
+    btn.disabled=true; btn.textContent='⏳ Menyimpan...'; msg.classList.add('hidden');
+    const { error } = await sb.from('warga').insert({
+      nama: document.getElementById('nama').value.trim(),
+      nik: document.getElementById('nik').value.trim() || null,
+      alamat_id: parseInt(document.getElementById('alamatId').value),
+      status: document.querySelector('input[name="status"]:checked')?.value,
+      catatan: document.getElementById('catatan').value.trim(),
+      sumber: 'web', status_validasi: 'pending', 
+      input_by: currentSession?.user?.email?.toLowerCase() || 'unknown'
+    });
+    msg.classList.remove('hidden');
+    if(error){ msg.textContent='❌ '+error.message; msg.className='mt-4 p-3 rounded text-sm bg-red-100 text-red-700'; }
+    else{ msg.textContent='✅ Tersimpan! Menunggu validasi.'; msg.className='mt-4 p-3 rounded text-sm bg-green-100 text-green-700'; e.target.reset(); if(typeof loadPersonalData==='function') loadPersonalData(); }
+    btn.disabled=false; btn.textContent='💾 Simpan Data';
+  };
+}
     checkSession();
   </script>
 </body>
 </html>
-
 
 
