@@ -9,20 +9,20 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-  <!-- 🔐 HALAMAN LOGIN -->
+  <!-- 🔐 LOGIN PAGE -->
   <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
       <h1 class="text-xl font-bold text-center mb-4">🔐 Login Sistem</h1>
       <form id="loginForm" class="space-y-4">
         <input type="email" id="email" placeholder="Email" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
         <input type="password" id="password" placeholder="Password" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-        <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Masuk</button>
+        <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Masuk</button>
       </form>
       <p id="loginError" class="text-red-600 text-sm mt-2 hidden"></p>
     </div>
   </div>
 
-  <!-- 🛡️ PANEL ADMIN (Hanya untuk admin@padamara.local) -->
+  <!-- ️ ADMIN DASHBOARD -->
   <div id="adminPage" class="hidden min-h-screen p-4 md:p-6">
     <div class="max-w-6xl mx-auto">
       <div class="flex justify-between items-center mb-6">
@@ -30,47 +30,44 @@
         <button id="btnLogout" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">Keluar</button>
       </div>
 
-      <!-- Statistik -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6" id="statsContainer">
-        <div class="bg-white p-4 rounded shadow text-center"><p class="text-sm text-gray-500">Total Terdata</p><p class="text-2xl font-bold" id="statTotal">-</p></div>
-        <div class="bg-green-100 p-4 rounded shadow text-center"><p class="text-sm text-green-700">✅ Siap (Valid)</p><p class="text-2xl font-bold text-green-800" id="statSiap">-</p></div>
-        <div class="bg-yellow-100 p-4 rounded shadow text-center"><p class="text-sm text-yellow-700">⚠️ Ragu (Valid)</p><p class="text-2xl font-bold text-yellow-800" id="statRagu">-</p></div>
-        <div class="bg-red-100 p-4 rounded shadow text-center"><p class="text-sm text-red-700">❌ Tolak (Valid)</p><p class="text-2xl font-bold text-red-800" id="statTolak">-</p></div>
-        <div class="bg-blue-100 p-4 rounded shadow text-center"><p class="text-sm text-blue-700">🕒 Menunggu</p><p class="text-2xl font-bold text-blue-800" id="statPending">-</p></div>
+      <!-- STATS -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white p-4 rounded shadow text-center"><p class="text-sm text-gray-500">Total Data</p><p class="text-2xl font-bold" id="statTotal">0</p></div>
+        <div class="bg-green-100 p-4 rounded shadow text-center"><p class="text-sm text-green-700">✅ Siap</p><p class="text-2xl font-bold text-green-800" id="statSiap">0</p></div>
+        <div class="bg-yellow-100 p-4 rounded shadow text-center"><p class="text-sm text-yellow-700">⚠️ Ragu</p><p class="text-2xl font-bold text-yellow-800" id="statRagu">0</p></div>
+        <div class="bg-red-100 p-4 rounded shadow text-center"><p class="text-sm text-red-700">❌ Tolak</p><p class="text-2xl font-bold text-red-800" id="statTolak">0</p></div>
+        <div class="bg-blue-100 p-4 rounded shadow text-center"><p class="text-sm text-blue-700">🕒 Pending</p><p class="text-2xl font-bold text-blue-800" id="statPending">0</p></div>
       </div>
 
-      <!-- Antrian Validasi -->
+      <!-- FILTERS -->
       <div class="bg-white p-4 rounded shadow mb-6">
+        <h2 class="text-lg font-semibold mb-3">🔍 Filter Data</h2>
+        <div class="flex flex-wrap gap-4 items-end">
+          <div class="flex-1 min-w-[150px]"><label class="block text-sm font-medium mb-1">Dusun</label><select id="filterDusun" class="w-full p-2 border rounded"><option value="">Semua Dusun</option></select></div>
+          <div class="flex-1 min-w-[150px]"><label class="block text-sm font-medium mb-1">RW</label><select id="filterRW" class="w-full p-2 border rounded"><option value="">Semua RW</option></select></div>
+          <button id="btnResetFilter" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm">Reset</button>
+          <button id="btnRefresh" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">🔄 Refresh</button>
+          <button id="btnExport" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">📤 Export CSV</button>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="bg-white p-4 rounded shadow overflow-x-auto">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold">📥 Antrian Data Pending</h2>
-          <div class="space-x-2">
-            <button id="btnValidateSelected" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm disabled:opacity-50">✅ Validasi Terpilih</button>
-            <button id="btnExport" class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 text-sm">📤 Export CSV</button>
-          </div>
+          <h2 class="text-lg font-semibold">📋 Data Pemilih</h2>
+          <span id="dataCount" class="text-sm text-gray-500">Memuat...</span>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left">
-            <thead class="bg-gray-50 text-gray-600">
-              <tr>
-                <th class="p-2"><input type="checkbox" id="checkAll" class="mr-2"></th>
-                <th class="p-2">Nama</th>
-                <th class="p-2">NIK</th>
-                <th class="p-2">Wilayah</th>
-                <th class="p-2">Status</th>
-                <th class="p-2">Catatan</th>
-                <th class="p-2">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="pendingTableBody" class="divide-y">
-              <tr><td colspan="7" class="p-4 text-center text-gray-500">Memuat data...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <table class="w-full text-sm text-left">
+          <thead class="bg-gray-50 text-gray-600">
+            <tr><th class="p-2"><input type="checkbox" id="checkAll" class="mr-2"></th><th class="p-2">Nama</th><th class="p-2">Wilayah</th><th class="p-2">Status</th><th class="p-2">Validasi</th><th class="p-2">Catatan</th><th class="p-2">Aksi</th></tr>
+          </thead>
+          <tbody id="dataTableBody" class="divide-y"><tr><td colspan="7" class="p-4 text-center text-gray-500">Memuat data...</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- 📝 HALAMAN RELAWAN -->
+  <!--  RELAWAN PAGE -->
   <div id="relawanPage" class="hidden min-h-screen p-4 flex items-center justify-center">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
       <div class="flex justify-between items-center mb-4">
@@ -80,20 +77,11 @@
       <p class="text-sm text-gray-500 mb-4">NIK boleh dikosongkan. Data masuk antrian validasi admin.</p>
 
       <form id="formWarga" class="space-y-4">
+        <div><label class="block text-sm font-medium">Nama Lengkap</label><input type="text" id="nama" required class="mt-1 w-full p-2 border rounded"></div>
+        <div><label class="block text-sm font-medium">NIK (Opsional)</label><input type="text" id="nik" class="mt-1 w-full p-2 border rounded" placeholder="Boleh dikosongkan"></div>
+        <div><label class="block text-sm font-medium">Wilayah</label><select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white"><option value="">-- Memuat wilayah... --</option></select></div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-          <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Ahmad Sudirman">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">NIK (Opsional)</label>
-          <input type="text" id="nik" class="mt-1 w-full p-2 border rounded" placeholder="Boleh dikosongkan">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Wilayah</label>
-          <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white"><option value="">-- Memuat wilayah... --</option></select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Status Dukungan</label>
+          <label class="block text-sm font-medium">Status Dukungan</label>
           <div class="mt-2 grid grid-cols-2 gap-2">
             <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-green-50"><input type="radio" name="status" value="siap" class="mr-2" required> Siap</label>
             <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-yellow-50"><input type="radio" name="status" value="ragu" class="mr-2"> Ragu</label>
@@ -101,168 +89,321 @@
             <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50"><input type="radio" name="status" value="belum" class="mr-2"> Belum</label>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
-          <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Sering kerja di luar kota"></textarea>
-        </div>
+        <div><label class="block text-sm font-medium">Catatan</label><textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded"></textarea></div>
         <button type="submit" id="btnSimpan" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">💾 Simpan Data</button>
       </form>
-      <div id="pesan" class="mt-4 p-3 rounded text-sm hidden"></div>
+
+      <!-- TOGGLE VIEW BUTTONS -->
+      <div class="mt-6 flex gap-2 mb-4">
+        <button id="btnViewPersonal" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium">📋 Data Saya</button>
+        <button id="btnViewRecap" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded text-sm font-medium hover:bg-gray-300">📊 Rekap Desa</button>
+      </div>
+
+      <!-- PERSONAL TABLE -->
+      <div id="personalView" class="bg-gray-50 p-4 rounded">
+        <h2 class="text-sm font-semibold mb-2 text-gray-600"> Data yang Sudah Saya Input</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600"><tr><th class="p-2">Nama</th><th class="p-2">Wilayah</th><th class="p-2">Status</th><th class="p-2">Validasi</th></tr></thead>
+            <tbody id="relawanTableBody" class="divide-y"><tr><td colspan="4" class="p-3 text-center text-gray-500">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RECAP VIEW (Hidden by default) -->
+      <div id="recapView" class="hidden bg-gray-50 p-4 rounded">
+        <h2 class="text-sm font-semibold mb-3 text-gray-600">📊 Rekap Perolehan Desa Padamara</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div class="bg-green-100 p-3 rounded text-center"><p class="text-xs text-gray-600">Siap</p><p class="text-xl font-bold text-green-800" id="recapSiap">0</p></div>
+          <div class="bg-yellow-100 p-3 rounded text-center"><p class="text-xs text-gray-600">Ragu</p><p class="text-xl font-bold text-yellow-800" id="recapRagu">0</p></div>
+          <div class="bg-red-100 p-3 rounded text-center"><p class="text-xs text-gray-600">Tolak</p><p class="text-xl font-bold text-red-800" id="recapTolak">0</p></div>
+          <div class="bg-blue-100 p-3 rounded text-center"><p class="text-xs text-gray-600">Total Valid</p><p class="text-xl font-bold text-blue-800" id="recapTotal">0</p></div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600"><tr><th class="p-2">Wilayah</th><th class="p-2">Siap</th><th class="p-2">Ragu</th><th class="p-2">Tolak</th><th class="p-2">Total</th></tr></thead>
+            <tbody id="recapTableBody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-   // 🔑 GANTI DENGAN DATA PROJECT SUPABASE ANDA
+    // 🔑 GANTI DENGAN DATA SUPABASE ANDA
     const SUPABASE_URL = 'https://givifuefydsncwkmubom.supabase.co'; 
     const SUPABASE_ANON_KEY = 'sb_publishable_xLEGtnkNTxxX3kr1QgqCKA_VEHv0VYc';
-
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const ADMIN_EMAIL = 'admin@padamara.local';
+    const ADMIN_EMAIL = 'admin@padamara.local'.toLowerCase();
+
+    let currentSession = null;
+    let allData = [];
+    let currentView = 'personal';
 
     // DOM Elements
     const loginPage = document.getElementById('loginPage');
     const adminPage = document.getElementById('adminPage');
     const relawanPage = document.getElementById('relawanPage');
+    const personalView = document.getElementById('personalView');
+    const recapView = document.getElementById('recapView');
 
-    // Cek sesi saat load
     async function checkSession() {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        loginPage.classList.remove('hidden'); adminPage.classList.add('hidden'); relawanPage.classList.add('hidden');
-        return;
-      }
+      currentSession = session;
+      
       loginPage.classList.add('hidden');
-      if (session.user.email === ADMIN_EMAIL) {
+      if (!session) { loginPage.classList.remove('hidden'); return; }
+
+      const email = session.user.email.toLowerCase();
+      if (email === ADMIN_EMAIL) {
         adminPage.classList.remove('hidden'); relawanPage.classList.add('hidden');
-        loadAdminData();
+        await loadAdminDashboard();
       } else {
         adminPage.classList.add('hidden'); relawanPage.classList.remove('hidden');
         loadAlamat();
+        toggleRelawanView('personal');
       }
     }
-    checkSession();
 
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('btnLogin');
-      const err = document.getElementById('loginError');
-      btn.disabled = true; btn.textContent = '⏳ Masuk...'; err.classList.add('hidden');
+    // 🔘 Toggle Relawan View
+    function toggleRelawanView(view) {
+      currentView = view;
+      const btnP = document.getElementById('btnViewPersonal');
+      const btnR = document.getElementById('btnViewRecap');
       
-      const { error } = await sb.auth.signInWithPassword({
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-      });
-      
-      if (error) { err.textContent = '❌ ' + error.message; err.classList.remove('hidden'); }
-      else { checkSession(); }
-      btn.disabled = false; btn.textContent = 'Masuk';
-    });
+      if (view === 'personal') {
+        personalView.classList.remove('hidden'); recapView.classList.add('hidden');
+        btnP.className = "flex-1 px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium";
+        btnR.className = "flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded text-sm font-medium hover:bg-gray-300";
+        loadPersonalData();
+      } else {
+        personalView.classList.add('hidden'); recapView.classList.remove('hidden');
+        btnP.className = "flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded text-sm font-medium hover:bg-gray-300";
+        btnR.className = "flex-1 px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium";
+        loadRecapData();
+      }
+    }
 
-    // Logout
-    document.getElementById('btnLogout').onclick = () => sb.auth.signOut().then(checkSession);
-    document.getElementById('btnLogoutRelawan').onclick = () => sb.auth.signOut().then(checkSession);
+    document.getElementById('btnViewPersonal').onclick = () => toggleRelawanView('personal');
+    document.getElementById('btnViewRecap').onclick = () => toggleRelawanView('recap');
 
-    // 🛡️ ADMIN FUNCTIONS
-    async function loadAdminData() {
-      // Statistik
-      const [total, siap, ragu, tolak, pending] = await Promise.all([
-        sb.from('warga').select('*', { count: 'exact', head: true }),
-        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'siap'),
-        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'ragu'),
-        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'tolak'),
-        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'pending')
-      ]);
-
-      document.getElementById('statTotal').textContent = total.count || 0;
-      document.getElementById('statSiap').textContent = siap.count || 0;
-      document.getElementById('statRagu').textContent = ragu.count || 0;
-      document.getElementById('statTolak').textContent = tolak.count || 0;
-      document.getElementById('statPending').textContent = pending.count || 0;
-
-      // Tabel Pending
-      const { data: pendingData, error } = await sb.from('warga').select(`
-        id, nama, nik, status, catatan,
+    // 📝 Load Personal Data (Relawan only)
+    async function loadPersonalData() {
+      const email = currentSession.user.email.toLowerCase();
+      const { data, error } = await sb.from('warga').select(`
+        id, nama, status, status_validasi, created_at,
         alamat_ref ( dusun, rw, rt )
-      `).eq('status_validasi', 'pending').order('created_at', { ascending: false });
+      `).eq('input_by', email).order('created_at', { ascending: false });
 
-      const tbody = document.getElementById('pendingTableBody');
-      if (error || !pendingData) { tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-500">Gagal memuat data</td></tr>'; return; }
-      
-      if (pendingData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500">✅ Tidak ada data pending</td></tr>'; return; }
-
-      tbody.innerHTML = pendingData.map(w => `
+      const tbody = document.getElementById('relawanTableBody');
+      if (error || !data?.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-gray-500">Belum ada data</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(w => `
         <tr class="hover:bg-gray-50">
-          <td class="p-2"><input type="checkbox" value="${w.id}" class="row-check mr-2"></td>
           <td class="p-2 font-medium">${w.nama}</td>
-          <td class="p-2 text-gray-600">${w.nik || '-'}</td>
           <td class="p-2">${w.alamat_ref?.rw || ''} / ${w.alamat_ref?.rt || ''} (${w.alamat_ref?.dusun || ''})</td>
-          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${w.status==='siap'?'bg-green-100 text-green-800':w.status==='ragu'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'}">${w.status.toUpperCase()}</span></td>
-          <td class="p-2 text-sm text-gray-500 max-w-xs truncate">${w.catatan || '-'}</td>
-          <td class="p-2 space-x-1">
-            <button onclick="validateRow('${w.id}','valid')" class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs hover:bg-green-200">✅</button>
-            <button onclick="validateRow('${w.id}','ditolak')" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs hover:bg-red-200">❌</button>
-          </td>
+          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${w.status==='siap'?'bg-green-100 text-green-800':'bg-yellow-100 text-yellow-800'}">${w.status.toUpperCase()}</span></td>
+          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${w.status_validasi==='valid'?'bg-green-600 text-white':'bg-blue-600 text-white'}">${w.status_validasi==='valid'?'✅ Valid':' Pending'}</span></td>
         </tr>
       `).join('');
     }
 
+    // 📊 Load Recap Data (All valid data grouped by wilayah)
+    async function loadRecapData() {
+      const { data, error } = await sb.from('warga').select(`
+        status, status_validasi,
+        alamat_ref ( dusun, rw, rt )
+      `);
+
+      if (error) { console.error(error); return; }
+      const rows = data || [];
+
+      // Filter only validated data for accurate recap
+      const validRows = rows.filter(r => r.status_validasi === 'valid');
+      
+      document.getElementById('recapTotal').textContent = validRows.length;
+      document.getElementById('recapSiap').textContent = validRows.filter(r => r.status === 'siap').length;
+      document.getElementById('recapRagu').textContent = validRows.filter(r => r.status === 'ragu').length;
+      document.getElementById('recapTolak').textContent = validRows.filter(r => r.status === 'tolak').length;
+
+      // Group by Dusun/RW
+      const grouped = {};
+      validRows.forEach(r => {
+        const key = `${r.alamat_ref?.dusun || 'N/A'} - RW ${r.alamat_ref?.rw || '?'}`;
+        if (!grouped[key]) grouped[key] = { siap: 0, ragu: 0, tolak: 0, total: 0 };
+        grouped[key].total++;
+        if (r.status === 'siap') grouped[key].siap++;
+        if (r.status === 'ragu') grouped[key].ragu++;
+        if (r.status === 'tolak') grouped[key].tolak++;
+      });
+
+      const tbody = document.getElementById('recapTableBody');
+      tbody.innerHTML = Object.entries(grouped).map(([wilayah, c]) => `
+        <tr class="hover:bg-gray-50">
+          <td class="p-2 font-medium">${wilayah}</td>
+          <td class="p-2 text-green-700">${c.siap}</td>
+          <td class="p-2 text-yellow-700">${c.ragu}</td>
+          <td class="p-2 text-red-700">${c.tolak}</td>
+          <td class="p-2 font-bold">${c.total}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 🛡️ ADMIN FUNCTIONS
+    async function loadAdminDashboard() {
+      const { data, error } = await sb.from('warga').select(`
+        id, nama, nik, status, catatan, status_validasi, created_at, input_by,
+        alamat_ref ( dusun, rw, rt )
+      `).order('created_at', { ascending: false });
+
+      if (error) return console.error(error);
+      allData = data || [];
+      populateFilters();
+      applyFilters();
+    }
+
+    function populateFilters() {
+      const dusuns = [...new Set(allData.map(d => d.alamat_ref?.dusun).filter(Boolean))].sort();
+      const rws = [...new Set(allData.map(d => d.alamat_ref?.rw).filter(Boolean))].sort();
+      document.getElementById('filterDusun').innerHTML = '<option value="">Semua Dusun</option>' + dusuns.map(d => `<option value="${d}">${d}</option>`).join('');
+      document.getElementById('filterRW').innerHTML = '<option value="">Semua RW</option>' + rws.map(r => `<option value="${r}">RW ${r}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const dVal = document.getElementById('filterDusun').value;
+      const rVal = document.getElementById('filterRW').value;
+      let filtered = allData;
+      if (dVal) filtered = filtered.filter(d => d.alamat_ref?.dusun === dVal);
+      if (rVal) filtered = filtered.filter(d => d.alamat_ref?.rw === rVal);
+
+      document.getElementById('statTotal').textContent = filtered.length;
+      document.getElementById('statSiap').textContent = filtered.filter(d => d.status === 'siap' && d.status_validasi === 'valid').length;
+      document.getElementById('statRagu').textContent = filtered.filter(d => d.status === 'ragu' && d.status_validasi === 'valid').length;
+      document.getElementById('statTolak').textContent = filtered.filter(d => d.status === 'tolak' && d.status_validasi === 'valid').length;
+      document.getElementById('statPending').textContent = filtered.filter(d => d.status_validasi === 'pending').length;
+      document.getElementById('dataCount').textContent = `Menampilkan ${filtered.length} data`;
+
+      const tbody = document.getElementById('dataTableBody');
+      if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500">Tidak ada data</td></tr>'; return; }
+
+      tbody.innerHTML = filtered.map(w => {
+        const wilayah = `${w.alamat_ref?.rw || ''} / ${w.alamat_ref?.rt || ''} (${w.alamat_ref?.dusun || ''})`;
+        const statusClass = w.status==='siap'?'bg-green-100 text-green-800':w.status==='ragu'?'bg-yellow-100 text-yellow-800':w.status==='tolak'?'bg-red-100 text-red-800':'bg-gray-100 text-gray-800';
+        const valClass = w.status_validasi==='valid'?'bg-green-600 text-white':'bg-blue-600 text-white';
+        const valText = w.status_validasi==='valid'?'✅ Valid':'⏳ Pending';
+        
+        let actions = '';
+        if (w.status_validasi === 'pending') {
+          actions += `<button onclick="validateRow('${w.id}','valid')" class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs hover:bg-green-200 mr-1">✅</button>`;
+          actions += `<button onclick="validateRow('${w.id}','ditolak')" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs hover:bg-red-200 mr-1">❌</button>`;
+        }
+        actions += `<button onclick="editRow('${w.id}')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs hover:bg-blue-200 mr-1">✏️</button>`;
+        actions += `<button onclick="deleteRow('${w.id}')" class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs hover:bg-gray-200">🗑️</button>`;
+
+        return `<tr class="hover:bg-gray-50">
+          <td class="p-2"><input type="checkbox" value="${w.id}" class="row-check mr-2"></td>
+          <td class="p-2 font-medium">${w.nama}</td>
+          <td class="p-2 text-gray-600">${wilayah}</td>
+          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${statusClass}">${w.status.toUpperCase()}</span></td>
+          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${valClass}">${valText}</span></td>
+          <td class="p-2 text-sm text-gray-500 max-w-xs truncate">${w.catatan || '-'}</td>
+          <td class="p-2 space-x-1">${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+
     window.validateRow = async (id, newStatus) => {
       const { error } = await sb.from('warga').update({ status_validasi: newStatus, validated_at: new Date().toISOString() }).eq('id', id);
-      if (!error) loadAdminData();
-      else alert('Gagal update: ' + error.message);
-    };
-
-    // Select All & Bulk Validate
-    document.getElementById('checkAll').onchange = (e) => document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
-    document.getElementById('btnValidateSelected').onclick = async () => {
-      const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
-      if (ids.length === 0) return alert('Pilih data dulu');
-      const { error } = await sb.from('warga').update({ status_validasi: 'valid', validated_at: new Date().toISOString() }).in('id', ids);
-      if (!error) { alert(`✅ ${ids.length} data divalidasi`); loadAdminData(); }
+      if (!error) { const idx = allData.findIndex(d => d.id == id); if(idx!==-1){allData[idx].status_validasi=newStatus; allData[idx].validated_at=new Date().toISOString();} applyFilters(); }
       else alert('Gagal: ' + error.message);
     };
 
-    // Export CSV
-    document.getElementById('btnExport').onclick = async () => {
-      const { data } = await sb.from('warga').select(`*, alamat_ref(dusun, rw, rt)`).eq('status_validasi', 'valid');
-      if (!data?.length) return alert('Belum ada data valid');
-      const csv = [
-        ['Nama','NIK','Dusun','RW','RT','Status','Catatan','Waktu Input'].join(','),
-        ...data.map(r => [r.nama, r.nik||'', r.alamat_ref.dusun, r.alamat_ref.rw, r.alamat_ref.rt, r.status, r.catatan||'', r.created_at].join(','))
-      ].join('\n');
-      const blob = new Blob([csv], {type:'text/csv'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `data_warga_valid_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    window.editRow = async (id) => {
+      const row = allData.find(d => d.id == id); if(!row) return;
+      const newName = prompt('Nama:', row.nama);
+      const newStatus = prompt('Status (siap/ragu/tolak/belum):', row.status);
+      const newCatatan = prompt('Catatan:', row.catatan || '');
+      if(newName === null) return;
+      const { error } = await sb.from('warga').update({ nama: newName.trim()||row.nama, status: newStatus?.toLowerCase()||row.status, catatan: newCatatan?.trim()||row.catatan }).eq('id', id);
+      if(!error){ alert('✅ Diupdate'); loadAdminDashboard(); } else alert('❌ '+error.message);
     };
 
-    // 📝 RELAWAN FUNCTIONS
+    window.deleteRow = async (id) => {
+      if(!confirm('⚠️ Yakin hapus data ini?')) return;
+      const { error } = await sb.from('warga').delete().eq('id', id);
+      if(!error){ alert('✅ Dihapus'); loadAdminDashboard(); } else alert('❌ '+error.message);
+    };
+
+    document.getElementById('checkAll').onchange = (e) => document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
+    document.getElementById('btnValidateSelected').onclick = async () => {
+      const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+      if(!ids.length) return alert('Pilih data dulu');
+      for(const id of ids){ await sb.from('warga').update({ status_validasi: 'valid', validated_at: new Date().toISOString() }).eq('id', id); }
+      alert(`✅ ${ids.length} data divalidasi`); loadAdminDashboard();
+    };
+
+    document.getElementById('filterDusun').onchange = applyFilters;
+    document.getElementById('filterRW').onchange = applyFilters;
+    document.getElementById('btnResetFilter').onclick = () => { document.getElementById('filterDusun').value=''; document.getElementById('filterRW').value=''; applyFilters(); };
+    document.getElementById('btnRefresh').onclick = loadAdminDashboard;
+
+    document.getElementById('btnExport').onclick = () => {
+      const dVal = document.getElementById('filterDusun').value;
+      const rVal = document.getElementById('filterRW').value;
+      let data = allData;
+      if(dVal) data = data.filter(d => d.alamat_ref?.dusun === dVal);
+      if(rVal) data = data.filter(d => d.alamat_ref?.rw === rVal);
+      if(!data.length) return alert('Tidak ada data');
+      const csv = [['Nama','NIK','Dusun','RW','RT','Status','Validasi','Catatan','Waktu'].join(','), ...data.map(r => [r.nama, r.nik||'', r.alamat_ref.dusun, r.alamat_ref.rw, r.alamat_ref.rt, r.status, r.status_validasi, r.catatan||'', r.created_at].join(','))].join('\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = `data_pilkades_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    };
+
+    // AUTH
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnLogin'); btn.disabled=true; btn.textContent='⏳ Masuk...';
+      const { error } = await sb.auth.signInWithPassword({ email: document.getElementById('email').value.trim(), password: document.getElementById('password').value });
+      if(error){ document.getElementById('loginError').textContent='❌ '+error.message; document.getElementById('loginError').classList.remove('hidden'); }
+      else checkSession();
+      btn.disabled=false; btn.textContent='Masuk';
+    };
+    document.getElementById('btnLogout').onclick = () => sb.auth.signOut().then(checkSession);
+    document.getElementById('btnLogoutRelawan').onclick = () => sb.auth.signOut().then(checkSession);
+
     async function loadAlamat() {
       const select = document.getElementById('alamatId');
-      const { data, error } = await sb.from('alamat_ref').select('id, dusun, rw, rt').order('rw', {ascending:true}).order('rt', {ascending:true});
-      if (error) { select.innerHTML = '<option>❌ Gagal</option>'; return; }
-      select.innerHTML = '<option value="">-- Pilih Wilayah --</option>' + data.map(r => `<option value="${r.id}">RW ${r.rw} - RT ${r.rt} (${r.dusun})</option>`).join('');
+      const { data } = await sb.from('alamat_ref').select('id, dusun, rw, rt').order('rw').order('rt');
+      select.innerHTML = '<option value="">-- Pilih Wilayah --</option>' + (data||[]).map(r => `<option value="${r.id}">RW ${r.rw} - RT ${r.rt} (${r.dusun})</option>`).join('');
     }
 
     document.getElementById('formWarga').onsubmit = async (e) => {
       e.preventDefault();
       const btn = document.getElementById('btnSimpan'); const msg = document.getElementById('pesan');
-      btn.disabled = true; btn.textContent = '⏳ Menyimpan...'; msg.classList.add('hidden');
-
-      const payload = {
+      btn.disabled=true; btn.textContent='⏳ Menyimpan...'; msg.classList.add('hidden');
+      
+      // ✅ FIX: Simpan email relawan sebagai input_by
+      const { error } = await sb.from('warga').insert({
         nama: document.getElementById('nama').value.trim(),
         nik: document.getElementById('nik').value.trim() || null,
         alamat_id: parseInt(document.getElementById('alamatId').value),
-        status: document.querySelector('input[name="status"]:checked').value,
+        status: document.querySelector('input[name="status"]:checked')?.value,
         catatan: document.getElementById('catatan').value.trim(),
-        sumber: 'web', status_validasi: 'pending', input_by: 'relawan_web'
-      };
+        sumber: 'web', status_validasi: 'pending', 
+        input_by: currentSession.user.email.toLowerCase()
+      });
 
-      const { error } = await sb.from('warga').insert(payload);
       msg.classList.remove('hidden');
-      if (error) { msg.textContent = '❌ ' + error.message; msg.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700'; }
-      else { msg.textContent = '✅ Tersimpan! Menunggu validasi.'; msg.className = 'mt-4 p-3 rounded text-sm bg-green-100 text-green-700'; e.target.reset(); }
-      btn.disabled = false; btn.textContent = '💾 Simpan Data';
+      if(error){ msg.textContent='❌ '+error.message; msg.className='mt-4 p-3 rounded text-sm bg-red-100 text-red-700'; }
+      else{ msg.textContent='✅ Tersimpan! Menunggu validasi.'; msg.className='mt-4 p-3 rounded text-sm bg-green-100 text-green-700'; e.target.reset(); loadPersonalData(); }
+      btn.disabled=false; btn.textContent='💾 Simpan Data';
     };
+
+    checkSession();
   </script>
 </body>
 </html>
+
+
+
