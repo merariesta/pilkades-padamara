@@ -12,203 +12,257 @@
   <!-- 🔐 HALAMAN LOGIN -->
   <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
-      <h1 class="text-xl font-bold text-center mb-4">🔐 Login Relawan</h1>
+      <h1 class="text-xl font-bold text-center mb-4">🔐 Login Sistem</h1>
       <form id="loginForm" class="space-y-4">
-        <input type="email" id="email" placeholder="Email" required 
-          class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-        <input type="password" id="password" placeholder="Password" required 
-          class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-        <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Masuk
-        </button>
+        <input type="email" id="email" placeholder="Email" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+        <input type="password" id="password" placeholder="Password" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+        <button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Masuk</button>
       </form>
       <p id="loginError" class="text-red-600 text-sm mt-2 hidden"></p>
     </div>
   </div>
 
-  <!-- 📝 HALAMAN FORM (Hanya muncul setelah login) -->
-  <div id="appPage" class="hidden p-4 max-w-md mx-auto">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-xl font-bold">📝 Input Data Warga</h1>
-      <button id="btnLogout" class="text-sm text-red-600 hover:underline">Keluar</button>
-    </div>
-    
-    <p class="text-sm text-gray-500 mb-4">NIK boleh dikosongkan. Data masuk antrian validasi admin.</p>
-
-    <form id="formWarga" class="space-y-4 bg-white p-4 rounded-lg shadow">
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-        <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Ahmad Sudirman">
+  <!-- 🛡️ PANEL ADMIN (Hanya untuk admin@padamara.local) -->
+  <div id="adminPage" class="hidden min-h-screen p-4 md:p-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">📊 Dashboard Admin - Pilkades Padamara</h1>
+        <button id="btnLogout" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">Keluar</button>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">NIK (Opsional)</label>
-        <input type="text" id="nik" class="mt-1 w-full p-2 border rounded" placeholder="Boleh dikosongkan">
+      <!-- Statistik -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6" id="statsContainer">
+        <div class="bg-white p-4 rounded shadow text-center"><p class="text-sm text-gray-500">Total Terdata</p><p class="text-2xl font-bold" id="statTotal">-</p></div>
+        <div class="bg-green-100 p-4 rounded shadow text-center"><p class="text-sm text-green-700">✅ Siap (Valid)</p><p class="text-2xl font-bold text-green-800" id="statSiap">-</p></div>
+        <div class="bg-yellow-100 p-4 rounded shadow text-center"><p class="text-sm text-yellow-700">⚠️ Ragu (Valid)</p><p class="text-2xl font-bold text-yellow-800" id="statRagu">-</p></div>
+        <div class="bg-red-100 p-4 rounded shadow text-center"><p class="text-sm text-red-700">❌ Tolak (Valid)</p><p class="text-2xl font-bold text-red-800" id="statTolak">-</p></div>
+        <div class="bg-blue-100 p-4 rounded shadow text-center"><p class="text-sm text-blue-700">🕒 Menunggu</p><p class="text-2xl font-bold text-blue-800" id="statPending">-</p></div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Wilayah</label>
-        <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white">
-          <option value="">-- Memuat wilayah... --</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Status Dukungan</label>
-        <div class="mt-2 grid grid-cols-2 gap-2">
-          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-green-50">
-            <input type="radio" name="status" value="siap" class="mr-2" required> Siap
-          </label>
-          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-yellow-50">
-            <input type="radio" name="status" value="ragu" class="mr-2"> Ragu
-          </label>
-          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-red-50">
-            <input type="radio" name="status" value="tolak" class="mr-2"> Tolak
-          </label>
-          <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
-            <input type="radio" name="status" value="belum" class="mr-2"> Belum
-          </label>
+      <!-- Antrian Validasi -->
+      <div class="bg-white p-4 rounded shadow mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold">📥 Antrian Data Pending</h2>
+          <div class="space-x-2">
+            <button id="btnValidateSelected" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm disabled:opacity-50">✅ Validasi Terpilih</button>
+            <button id="btnExport" class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 text-sm">📤 Export CSV</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-gray-50 text-gray-600">
+              <tr>
+                <th class="p-2"><input type="checkbox" id="checkAll" class="mr-2"></th>
+                <th class="p-2">Nama</th>
+                <th class="p-2">NIK</th>
+                <th class="p-2">Wilayah</th>
+                <th class="p-2">Status</th>
+                <th class="p-2">Catatan</th>
+                <th class="p-2">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody" class="divide-y">
+              <tr><td colspan="7" class="p-4 text-center text-gray-500">Memuat data...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
-        <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Sering kerja di luar kota"></textarea>
+  <!-- 📝 HALAMAN RELAWAN -->
+  <div id="relawanPage" class="hidden min-h-screen p-4 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">📝 Input Data Warga</h1>
+        <button id="btnLogoutRelawan" class="text-sm text-red-600 hover:underline">Keluar</button>
       </div>
+      <p class="text-sm text-gray-500 mb-4">NIK boleh dikosongkan. Data masuk antrian validasi admin.</p>
 
-      <button type="submit" id="btnSimpan" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">
-        💾 Simpan Data
-      </button>
-    </form>
-
-    <div id="pesan" class="mt-4 p-3 rounded text-sm hidden"></div>
+      <form id="formWarga" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+          <input type="text" id="nama" required class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Ahmad Sudirman">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">NIK (Opsional)</label>
+          <input type="text" id="nik" class="mt-1 w-full p-2 border rounded" placeholder="Boleh dikosongkan">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Wilayah</label>
+          <select id="alamatId" required class="mt-1 w-full p-2 border rounded bg-white"><option value="">-- Memuat wilayah... --</option></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status Dukungan</label>
+          <div class="mt-2 grid grid-cols-2 gap-2">
+            <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-green-50"><input type="radio" name="status" value="siap" class="mr-2" required> Siap</label>
+            <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-yellow-50"><input type="radio" name="status" value="ragu" class="mr-2"> Ragu</label>
+            <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-red-50"><input type="radio" name="status" value="tolak" class="mr-2"> Tolak</label>
+            <label class="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50"><input type="radio" name="status" value="belum" class="mr-2"> Belum</label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
+          <textarea id="catatan" rows="2" class="mt-1 w-full p-2 border rounded" placeholder="Contoh: Sering kerja di luar kota"></textarea>
+        </div>
+        <button type="submit" id="btnSimpan" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50">💾 Simpan Data</button>
+      </form>
+      <div id="pesan" class="mt-4 p-3 rounded text-sm hidden"></div>
+    </div>
   </div>
 
   <script>
-    // 🔑 GANTI DENGAN DATA SUPABASE ANDA
+   // 🔑 GANTI DENGAN DATA PROJECT SUPABASE ANDA
     const SUPABASE_URL = 'https://givifuefydsncwkmubom.supabase.co'; 
     const SUPABASE_ANON_KEY = 'sb_publishable_xLEGtnkNTxxX3kr1QgqCKA_VEHv0VYc';
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ADMIN_EMAIL = 'admin@padamara.local';
 
-    // Elemen DOM
+    // DOM Elements
     const loginPage = document.getElementById('loginPage');
-    const appPage = document.getElementById('appPage');
-    const loginForm = document.getElementById('loginForm');
-    const loginError = document.getElementById('loginError');
-    const btnLogout = document.getElementById('btnLogout');
+    const adminPage = document.getElementById('adminPage');
+    const relawanPage = document.getElementById('relawanPage');
 
-    // Cek sesi login saat halaman dimuat
+    // Cek sesi saat load
     async function checkSession() {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        loginPage.classList.add('hidden');
-        appPage.classList.remove('hidden');
-        loadAlamat();
+      if (!session) {
+        loginPage.classList.remove('hidden'); adminPage.classList.add('hidden'); relawanPage.classList.add('hidden');
+        return;
+      }
+      loginPage.classList.add('hidden');
+      if (session.user.email === ADMIN_EMAIL) {
+        adminPage.classList.remove('hidden'); relawanPage.classList.add('hidden');
+        loadAdminData();
       } else {
-        loginPage.classList.remove('hidden');
-        appPage.classList.add('hidden');
+        adminPage.classList.add('hidden'); relawanPage.classList.remove('hidden');
+        loadAlamat();
       }
     }
     checkSession();
 
-    // Handle Login
-    loginForm.addEventListener('submit', async (e) => {
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
       const btn = document.getElementById('btnLogin');
+      const err = document.getElementById('loginError');
+      btn.disabled = true; btn.textContent = '⏳ Masuk...'; err.classList.add('hidden');
       
-      btn.disabled = true;
-      btn.textContent = '⏳ Masuk...';
-      loginError.classList.add('hidden');
-
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await sb.auth.signInWithPassword({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      });
       
-      if (error) {
-        loginError.textContent = '❌ ' + error.message;
-        loginError.classList.remove('hidden');
-      } else {
-        checkSession();
-      }
-      btn.disabled = false;
-      btn.textContent = 'Masuk';
+      if (error) { err.textContent = '❌ ' + error.message; err.classList.remove('hidden'); }
+      else { checkSession(); }
+      btn.disabled = false; btn.textContent = 'Masuk';
     });
 
-    // Handle Logout
-    btnLogout.addEventListener('click', async () => {
-      await sb.auth.signOut();
-      checkSession();
-    });
+    // Logout
+    document.getElementById('btnLogout').onclick = () => sb.auth.signOut().then(checkSession);
+    document.getElementById('btnLogoutRelawan').onclick = () => sb.auth.signOut().then(checkSession);
 
-    // Load Dropdown Wilayah
-    async function loadAlamat() {
-      const select = document.getElementById('alamatId');
-      try {
-        const { data, error } = await sb
-          .from('alamat_ref')
-          .select('id, dusun, rw, rt')
-          .order('rw', { ascending: true })
-          .order('rt', { ascending: true });
+    // 🛡️ ADMIN FUNCTIONS
+    async function loadAdminData() {
+      // Statistik
+      const [total, siap, ragu, tolak, pending] = await Promise.all([
+        sb.from('warga').select('*', { count: 'exact', head: true }),
+        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'siap'),
+        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'ragu'),
+        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'valid').eq('status', 'tolak'),
+        sb.from('warga').select('*', { count: 'exact', head: true }).eq('status_validasi', 'pending')
+      ]);
 
-        if (error) throw error;
+      document.getElementById('statTotal').textContent = total.count || 0;
+      document.getElementById('statSiap').textContent = siap.count || 0;
+      document.getElementById('statRagu').textContent = ragu.count || 0;
+      document.getElementById('statTolak').textContent = tolak.count || 0;
+      document.getElementById('statPending').textContent = pending.count || 0;
 
-        select.innerHTML = '<option value="">-- Pilih Wilayah --</option>';
-        data?.forEach(row => {
-          const opt = document.createElement('option');
-          opt.value = row.id;
-          opt.textContent = `RW ${row.rw} - RT ${row.rt} (${row.dusun})`;
-          select.appendChild(opt);
-        });
-      } catch (err) {
-        console.error('Gagal muat wilayah:', err);
-        select.innerHTML = '<option value="">❌ Gagal memuat</option>';
-      }
+      // Tabel Pending
+      const { data: pendingData, error } = await sb.from('warga').select(`
+        id, nama, nik, status, catatan,
+        alamat_ref ( dusun, rw, rt )
+      `).eq('status_validasi', 'pending').order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('pendingTableBody');
+      if (error || !pendingData) { tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-500">Gagal memuat data</td></tr>'; return; }
+      
+      if (pendingData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500">✅ Tidak ada data pending</td></tr>'; return; }
+
+      tbody.innerHTML = pendingData.map(w => `
+        <tr class="hover:bg-gray-50">
+          <td class="p-2"><input type="checkbox" value="${w.id}" class="row-check mr-2"></td>
+          <td class="p-2 font-medium">${w.nama}</td>
+          <td class="p-2 text-gray-600">${w.nik || '-'}</td>
+          <td class="p-2">${w.alamat_ref?.rw || ''} / ${w.alamat_ref?.rt || ''} (${w.alamat_ref?.dusun || ''})</td>
+          <td class="p-2"><span class="px-2 py-1 rounded text-xs font-bold ${w.status==='siap'?'bg-green-100 text-green-800':w.status==='ragu'?'bg-yellow-100 text-yellow-800':'bg-red-100 text-red-800'}">${w.status.toUpperCase()}</span></td>
+          <td class="p-2 text-sm text-gray-500 max-w-xs truncate">${w.catatan || '-'}</td>
+          <td class="p-2 space-x-1">
+            <button onclick="validateRow('${w.id}','valid')" class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs hover:bg-green-200">✅</button>
+            <button onclick="validateRow('${w.id}','ditolak')" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs hover:bg-red-200">❌</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    // Handle Submit Form
-    document.getElementById('formWarga').addEventListener('submit', async (e) => {
+    window.validateRow = async (id, newStatus) => {
+      const { error } = await sb.from('warga').update({ status_validasi: newStatus, validated_at: new Date().toISOString() }).eq('id', id);
+      if (!error) loadAdminData();
+      else alert('Gagal update: ' + error.message);
+    };
+
+    // Select All & Bulk Validate
+    document.getElementById('checkAll').onchange = (e) => document.querySelectorAll('.row-check').forEach(cb => cb.checked = e.target.checked);
+    document.getElementById('btnValidateSelected').onclick = async () => {
+      const ids = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+      if (ids.length === 0) return alert('Pilih data dulu');
+      const { error } = await sb.from('warga').update({ status_validasi: 'valid', validated_at: new Date().toISOString() }).in('id', ids);
+      if (!error) { alert(`✅ ${ids.length} data divalidasi`); loadAdminData(); }
+      else alert('Gagal: ' + error.message);
+    };
+
+    // Export CSV
+    document.getElementById('btnExport').onclick = async () => {
+      const { data } = await sb.from('warga').select(`*, alamat_ref(dusun, rw, rt)`).eq('status_validasi', 'valid');
+      if (!data?.length) return alert('Belum ada data valid');
+      const csv = [
+        ['Nama','NIK','Dusun','RW','RT','Status','Catatan','Waktu Input'].join(','),
+        ...data.map(r => [r.nama, r.nik||'', r.alamat_ref.dusun, r.alamat_ref.rw, r.alamat_ref.rt, r.status, r.catatan||'', r.created_at].join(','))
+      ].join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `data_warga_valid_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    };
+
+    // 📝 RELAWAN FUNCTIONS
+    async function loadAlamat() {
+      const select = document.getElementById('alamatId');
+      const { data, error } = await sb.from('alamat_ref').select('id, dusun, rw, rt').order('rw', {ascending:true}).order('rt', {ascending:true});
+      if (error) { select.innerHTML = '<option>❌ Gagal</option>'; return; }
+      select.innerHTML = '<option value="">-- Pilih Wilayah --</option>' + data.map(r => `<option value="${r.id}">RW ${r.rw} - RT ${r.rt} (${r.dusun})</option>`).join('');
+    }
+
+    document.getElementById('formWarga').onsubmit = async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('btnSimpan');
-      const pesan = document.getElementById('pesan');
-      
-      btn.disabled = true;
-      btn.textContent = '⏳ Menyimpan...';
-      pesan.classList.add('hidden');
+      const btn = document.getElementById('btnSimpan'); const msg = document.getElementById('pesan');
+      btn.disabled = true; btn.textContent = '⏳ Menyimpan...'; msg.classList.add('hidden');
 
-      const nama = document.getElementById('nama').value.trim();
-      const nik = document.getElementById('nik').value.trim() || null;
-      const alamatId = document.getElementById('alamatId').value;
-      const status = document.querySelector('input[name="status"]:checked')?.value;
-      const catatan = document.getElementById('catatan').value.trim();
-
-      if (!nama || !alamatId || !status) {
-        pesan.textContent = '❌ Mohon lengkapi Nama, Wilayah, dan Status.';
-        pesan.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700';
-        pesan.classList.remove('hidden');
-        btn.disabled = false;
-        btn.textContent = '💾 Simpan Data';
-        return;
-      }
-
-      const { error } = await sb.from('warga').insert({
-        nama, nik, alamat_id: parseInt(alamatId), status, catatan,
+      const payload = {
+        nama: document.getElementById('nama').value.trim(),
+        nik: document.getElementById('nik').value.trim() || null,
+        alamat_id: parseInt(document.getElementById('alamatId').value),
+        status: document.querySelector('input[name="status"]:checked').value,
+        catatan: document.getElementById('catatan').value.trim(),
         sumber: 'web', status_validasi: 'pending', input_by: 'relawan_web'
-      });
+      };
 
-      pesan.classList.remove('hidden');
-      if (error) {
-        pesan.textContent = `❌ Gagal: ${error.message}`;
-        pesan.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700';
-      } else {
-        pesan.textContent = '✅ Data berhasil disimpan! Menunggu validasi admin.';
-        pesan.className = 'mt-4 p-3 rounded text-sm bg-green-100 text-green-700';
-        e.target.reset();
-        document.getElementById('alamatId').value = '';
-      }
-      btn.disabled = false;
-      btn.textContent = '💾 Simpan Data';
-    });
+      const { error } = await sb.from('warga').insert(payload);
+      msg.classList.remove('hidden');
+      if (error) { msg.textContent = '❌ ' + error.message; msg.className = 'mt-4 p-3 rounded text-sm bg-red-100 text-red-700'; }
+      else { msg.textContent = '✅ Tersimpan! Menunggu validasi.'; msg.className = 'mt-4 p-3 rounded text-sm bg-green-100 text-green-700'; e.target.reset(); }
+      btn.disabled = false; btn.textContent = '💾 Simpan Data';
+    };
   </script>
 </body>
 </html>
