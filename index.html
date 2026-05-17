@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Pilkades App</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<div id="app" class="p-4 pb-24">
+
+  <!-- Header -->
+  <div class="bg-white rounded-xl shadow p-4 mb-4">
+
+    <div class="flex justify-between items-center">
+
+      <div>
+
+        <h1 class="text-xl font-bold">
+          Pilkades App
+        </h1>
+
+        <p
+          id="user-info"
+          class="text-sm text-gray-600"
+        >
+          Loading...
+        </p>
+
+      </div>
+
+      <button
+        onclick="logout()"
+        class="bg-red-600 text-white px-4 py-2 rounded-lg"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Dashboard -->
+  <div
+    id="dashboard-content"
+    class="bg-white rounded-xl shadow p-4"
+  >
+    Dashboard
+  </div>
+<div id="bottom-navigation"></div>
+</div>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Supabase Config -->
+<script src="./js/constants.js"></script>
+
+<script src="./js/supabase.js"></script>
+
+<script src="./js/auth/session.js"></script>
+
+<script src="./js/auth/auth-guard.js"></script>
+
+<script src="./js/auth/profile.js"></script>
+
+<script src="./js/auth/role.js"></script>
+
+<script src="./js/auth/logout.js"></script>
+
+<script src="./js/dashboard/stats.js"></script>
+
+<script src="./js/dashboard/dashboard-ui.js"></script>
+
+<script src="./js/navigation/navigation.js"></script>
+
+<script src="./js/account/account.js"></script>
+
+<script src="./js/warga/warga-api.js"></script>
+
+<script src="./js/warga/warga-ui.js"></script>
+
+<script src="./js/warga/warga-form.js"></script>
+
+<script src="./js/warga/warga-table.js"></script>
+<script src="./js/warga/warga-export.js"></script>
+<script src="./js/dashboard/settings-api.js"></script>
+<script src="./js/dashboard/dashboard-analytics.js"></script>
+<script src="./js/utils/toast.js"></script>
+<script src="./js/app.js"></script>
+
+</body>
+</html>
